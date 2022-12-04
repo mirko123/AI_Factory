@@ -1,4 +1,7 @@
 EVA/
 models/
 YOLO_Test_from_TF/
+web/Beekeeper/
+web/bower_components/
+web/js/
 YOLOX/
