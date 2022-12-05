@@ -23,23 +23,14 @@ class DBTrafficSystem
 
 	public function remove($id)
 	{
+		$dbPlatna = new DBPlatna();
+		$dbPlatna->removeBySystemId($id);
+
 		$query = "DELETE FROM `traffic_system` WHERE id=:id";
 		$statement = $this->db->connection->prepare($query);
 		$statement->bindParam(":id",$id);
 		$res = $statement->execute();
 	}
-
-	// public function getByLecture($lectureName)
-	// {	
-	// 	$query = "SELECT ids.id, ids.name, ids.lecture, ids.credits, lectures.department FROM ids INNER JOIN lectures ON lectures.username = ids.lecture  WHERE ids.lecture = :lecture";
-	// 	$statement = $this->db->connection->prepare($query);
-	// 	$statement->bindParam(":lecture",$lectureName);
-	// 	$statement->execute();
-	// 	$count = $statement->rowCount();
-
-	// 	if($count != 0) return $statement->fetchAll(PDO::FETCH_ASSOC);
-	// 	return array();
-	// }
 
 	public function getAll()
 	{	
@@ -67,11 +58,10 @@ class DBPlatna
 		$this->db = DB::getInstance();;
 	}
 
-	public function add($name, $systemId, $discription)
+	public function add($systemId, $discription)
 	{	
-		$query = "INSERT INTO `platna` (name, systemId, discription) VALUES (:name, :systemId, :discription)";
+		$query = "INSERT INTO `platna` (systemId, discription) VALUES (:systemId, :discription)";
 		$statement = $this->db->connection->prepare($query);
-		$statement->bindParam(":name",$name);
 		$statement->bindParam(":systemId",$systemId);
 		$statement->bindParam(":discription",$discription);
 		$res = $statement->execute();
@@ -80,9 +70,28 @@ class DBPlatna
 
 	public function remove($id)
 	{
+		$dbLanes = new DBLanes();
+		$dbLanes->removeByPlatnoId($id);
+
 		$query = "DELETE FROM `platna` WHERE id=:id";
 		$statement = $this->db->connection->prepare($query);
 		$statement->bindParam(":id",$id);
+		$res = $statement->execute();
+	}
+
+	public function removeBySystemId($systemId)
+	{
+
+		$platna = $this->getBySystem($systemId);
+		foreach ($platna as $key => $platno) {
+			$platnoId = $platno["id"];
+			$dbLanes = new DBLanes();
+			$dbLanes->removeByPlatnoId($platnoId);
+		}
+
+		$query = "DELETE FROM `platna` WHERE systemId=:systemId";
+		$statement = $this->db->connection->prepare($query);
+		$statement->bindParam(":systemId",$systemId);
 		$res = $statement->execute();
 	}
 
@@ -109,7 +118,7 @@ class DBPlatna
 	}
 }
 
-class DBLenti
+class DBLanes
 {
 	protected $db;
 	function __construct()
@@ -118,11 +127,10 @@ class DBLenti
 		$this->db = DB::getInstance();;
 	}
 
-	public function add($name, $platnoId, $direction)
+	public function add($platnoId, $direction)
 	{	
-		$query = "INSERT INTO `lenti` (name, platnoId, direction) VALUES (:name, :platnoId, :direction)";
+		$query = "INSERT INTO `lenti` (platnoId, direction) VALUES (:platnoId, :direction)";
 		$statement = $this->db->connection->prepare($query);
-		$statement->bindParam(":name",$name);
 		$statement->bindParam(":platnoId",$platnoId);
 		$statement->bindParam(":direction",$direction);
 		$res = $statement->execute();
@@ -136,6 +144,15 @@ class DBLenti
 		$statement->bindParam(":id",$id);
 		$res = $statement->execute();
 	}
+
+	public function removeByPlatnoId($platnoId)
+	{
+		$query = "DELETE FROM `lenti` WHERE lenti.platnoId=:platnoId";
+		$statement = $this->db->connection->prepare($query);
+		$statement->bindParam(":platnoId",$platnoId);
+		$res = $statement->execute();
+	}
+
 
 	public function getByPlatnoId($platnoId)
 	{	
