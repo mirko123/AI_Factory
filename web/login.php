@@ -38,7 +38,7 @@
                 $_SESSION["type"] = $type;
                 $_SESSION['logged_in'] = 1; 
                 $_SESSION['username'] = $username; 
-                header('Location: profile.php?type='.$type.'&username='.$username);
+                header('Location: index.php?type='.$type.'&username='.$username);
             }
             else {
                 echo '<div class="alert alert-danger">

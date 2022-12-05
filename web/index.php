@@ -9,7 +9,13 @@
     <section id="container" class="container text-center">
     </section>
 	<?php 
-		header('Location: discipline.php');
+
+	if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == 1)     {
+		header('Location: systems.php');
+	}
+	else {
+		header('Location: login.php');
+	}
 	 ?>
 </body>
 
