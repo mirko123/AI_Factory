@@ -43,32 +43,52 @@ class mainTemplate
             echo '
                             <li class="systems">
                                 <a href="systems.php">Светофарни системи</a>
-                            </li>';
-        }
+                            </li>
 
-		echo '
-                <li class="users">
-                    <a href="users.php">Студенти</a>
-                </li>
-                <li class="users">
-                    <a href="lectures.php">Преподаватели</a>
-                </li>
-                <li class="ids">
-                    <a href="discipline.php">ИД</a>
-                </li>';
+                            <li class="systems">
+                                <a href="uploadImage.php">Калибриране на каемра</a>
+                            </li>
+
+                            <li class="systems">
+                                <a href="testUpload.php">Test upload</a>
+                            </li>
+                            ';
+        }
         if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == 1) 
-	        echo '<li><a href="profile.php?type='.$_SESSION['type'].'&username='.$_SESSION['username'].'">Профил</a></li>
-	              <li><a class="btn-nav-logout" href="logout.php">Изход</a></li>';
+	        echo '<li><a class="btn-nav-logout" href="logout.php">Изход</a></li>';
 
    		else {
    			echo '<li>
                     <a href="login.php">Вход</a>
                 </li>
-                <li>
-                    <a href="register.php">Регистрация</a>
-                </li>
             </ul>';
    		}
+
+
+        // echo '
+        //         <li class="users">
+        //             <a href="users.php">Студенти</a>
+        //         </li>
+        //         <li class="users">
+        //             <a href="lectures.php">Преподаватели</a>
+        //         </li>
+        //         <li class="ids">
+        //             <a href="discipline.php">ИД</a>
+        //         </li>';
+        // if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == 1) 
+        //     echo '<li><a href="profile.php?type='.$_SESSION['type'].'&username='.$_SESSION['username'].'">Профил</a></li>
+        //           <li><a class="btn-nav-logout" href="logout.php">Изход</a></li>';
+
+        // else {
+        //     echo '<li>
+        //             <a href="login.php">Вход</a>
+        //         </li>
+        //         <li>
+        //             <a href="register.php">Регистрация</a>
+        //         </li>
+        //     </ul>';
+        // }
+
 		echo "</nav></header>";
    	}
 }

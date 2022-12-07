@@ -2,6 +2,59 @@
 <html lang="en">
 <?php require_once("php/templates.php");
     mainTemplate::head();
+
+    class SystemObj {
+	    public $id;
+	    public $name;
+	    public $roadways;
+		function __construct($id, $name, $roadways = array()) {
+			$this->id = $id;
+			$this->name = $name;
+			$this->roadways = $roadways;
+		}
+	}
+	class RoadwayObj {
+	    public $id;
+	    public $discription;
+	    public $lanes;
+		function __construct($id, $discription, $lanes = array()) {
+			$this->id = $id;
+			$this->discription = $discription;
+			$this->lanes = $lanes;
+		}
+	}
+	class LanesObj {
+	    public $id;
+	    public $direction;
+		function __construct($id, $direction) {
+			$this->id = $id;
+			$this->direction = $direction;
+		}
+	}
+
+	function generateSystemTree() {
+		$dbTrafficSystem = new DBTrafficSystem();
+		$dbRoadway = new DBRoadway();
+		$dbLanes = new DBLanes();
+
+		$finalTree = array();
+		$systems = $dbTrafficSystem->getAll();
+		foreach ($systems as $key => $system) {
+			$currentSystem = new SystemObj($system["id"], $system["name"]);
+			$roadways = $dbRoadway->getBySystemId($currentSystem->id);
+			foreach ($roadways as $key => $roadway) {
+				$currentRoadway = new RoadwayObj($roadway["id"], $roadway["discription"]);
+				$lanes = $dbLanes->getByRoadwayId($currentRoadway->id);
+				foreach ($lanes as $key => $lane) {
+					$currentLane = new LanesObj($lane["id"], $lane["direction"]);
+					array_push($currentRoadway->lanes, $currentLane);
+				}
+				array_push($currentSystem->roadways, $currentRoadway);
+			}
+			array_push($finalTree, $currentSystem);
+		}
+		return $finalTree;
+	}
  ?>
 <body id="page">
     <?php mainTemplate::header(); ?>
@@ -19,7 +72,7 @@ function generateCol($content, $size = 2, $bordered = true, $paddingTop = true) 
 	}
   	return '<div class="col-'.(string)$size.' '.$classes.'">'.(string)$content.'</div>'. PHP_EOL;
 }
-function createPlatnoAddForm($systemId) {
+function createRoadwayAddForm($systemId) {
 	echo '		<div class="container">
 			<h2>Добавяне на светофарна система</h2>
 			<form class="form-horizontal" action="php/system.php" method="POST">
@@ -40,10 +93,10 @@ function createPlatnoAddForm($systemId) {
 		</div>';
 }
 
-function generateAddPlatnoButton($systemId) {
+function generateAddRoadwayButton($systemId) {
 	$content = '
 	<div class="row border-bottom pt-2">
-		<form class="col" action="addPlatno.php" method="POST">
+		<form class="col" action="addRoadway.php" method="POST">
 				    <div class="form-group">
 				        <input name="systemId" id="tb-idname" class="form-control d-inline" value="'.$systemId.'" type="hidden">
 				        <input type="submit" class="col-sm btn btn-success d-inline" value="Add"/>
@@ -55,12 +108,12 @@ function generateAddPlatnoButton($systemId) {
 }
 
 
-function generateAddLaneButton($platnoId) {
+function generateAddLaneButton($roadwayId) {
 	$content = '
 	<div class="row pt-2">
 		<form class="col" action="addLane.php" method="POST">
 				    <div class="form-group">
-				        <input name="platnoId" id="tb-idname" class="form-control d-inline" value="'.$platnoId.'" type="hidden">
+				        <input name="roadwayId" id="tb-idname" class="form-control d-inline" value="'.$roadwayId.'" type="hidden">
 				        <input type="submit" class="col-sm btn btn-success d-inline" value="Add"/>
 				    </div>
 				</form>
@@ -81,12 +134,12 @@ function generateSystemRemoveButton($systemId) {
 	return $content;		
 }
 
-function generatePlatnoRemoveButton($platnoId) {
+function generateRoadwayRemoveButton($roadwayId) {
 	$content = '
 		<form class="col-sm-1" action="systems.php" method="POST">
 		    <div class="form-group">
-		        <input name="platnoId" id="tb-idname" class="form-control d-inline" value="'.$platnoId.'" type="hidden">
-		        <input name="queryType" id="tb-idname" class="form-control d-inline" value="removePlatno" type="hidden">
+		        <input name="roadwayId" id="tb-idname" class="form-control d-inline" value="'.$roadwayId.'" type="hidden">
+		        <input name="queryType" id="tb-idname" class="form-control d-inline" value="removeRoadway" type="hidden">
 		        <button class="btn btn-danger btn-xs btn-delete-esp" data-title="Delete" data-toggle="modal" data-target="#delete" ><span class="glyphicon glyphicon-trash"></span></button>
 		    </div>
 		</form>';
@@ -144,19 +197,19 @@ if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == 1)     {
 			$dbTrafficSystem = new DBTrafficSystem();
 			$dbTrafficSystem->add($newSystemName);
 		}
-		else if($queryType == "newPlatno") {
+		else if($queryType == "newRoadway") {
 
 			$currentSystemId = $_METHOD['systemId'];
-			$platnoDiscription = $_METHOD['discription'];
-			$dbPlatna = new DBPlatna();
-			$dbPlatna->add($currentSystemId, $platnoDiscription);
+			$roadwayDiscription = $_METHOD['discription'];
+			$dbRoadway = new DBRoadway();
+			$dbRoadway->add($currentSystemId, $roadwayDiscription);
 		}
 		else if($queryType == "newLane") {
 
-			$platnoId = $_METHOD['platnoId'];
+			$roadwayId = $_METHOD['roadwayId'];
 			$laneDirection = $_METHOD['direction'];
 			$dbLanes = new DBLanes();
-			$dbLanes->add($platnoId, $laneDirection);
+			$dbLanes->add($roadwayId, $laneDirection);
 		}
 
 		else if($queryType == "removeSystem") {
@@ -165,11 +218,11 @@ if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == 1)     {
 			$dbTrafficSystem = new dbTrafficSystem();
 			$dbTrafficSystem->remove($systemId);
 		}
-		else if($queryType == "removePlatno") {
+		else if($queryType == "removeRoadway") {
 
-			$platnoId = $_METHOD['platnoId'];
-			$dbPlatna = new dbPlatna();
-			$dbPlatna->remove($platnoId);
+			$roadwayId = $_METHOD['roadwayId'];
+			$dbRoadway = new DBRoadway();
+			$dbRoadway->remove($roadwayId);
 		}
 		else if($queryType == "removeLane") {
 
@@ -200,53 +253,61 @@ if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == 1)     {
 			</form>
 		</div>
 		</br></br>
+<?php 
 
+	$systems = generateSystemTree();
+	$systemsInJson = json_encode($systems); 
+	echo '<script> var systemsInJson = '.$systemsInJson.";\n</script>";	
+	?>
 
 	<div class="container-fluid">
 	  <div class="row  ">
-	    <div class="col-1 border pt-1">#</div>
+	    <!-- <div class="col-1 border pt-1">#</div> -->
 	    <div class="col-2 border pt-1">Име</div>
 	    <div class="col-2 border pt-1">Платна</div>
 	    <div class="col-2 border pt-1">Ленти</div>
-	    <div class="col-5 border pt-1">Визуализация</div>
+	    <div class="col-6 border pt-1">Визуализация</div>
 	  </div>
   		<?php 
 			
-			$dbTrafficSystem = new DBTrafficSystem();
-			$dbPlatna = new DBPlatna();
-			$dbLanes = new DBLanes();
-			$systems = $dbTrafficSystem->getAll();
+			// $dbTrafficSystem = new DBTrafficSystem();
+			// $dbRoadway = new DBRoadway();
+			// $dbLanes = new DBLanes();
+			// $systems = $dbTrafficSystem->getAll();
 			foreach ($systems as $key => $system) {
 				echo "<div class='row'>". PHP_EOL;
 
-				echo generateCol($system["id"], 1);
-				echo generateCol('<div class="col-sm-10 ">'.$system["name"].'</div>'.generateSystemRemoveButton($system["id"]), 2);
-				$platna = $dbPlatna->getBySystem($system["id"]);
+				// echo generateCol($system->id, 1);
+				echo generateCol('<div class="col-sm-10 ">'.$system->name.'</div>'.generateSystemRemoveButton($system->id), 2);
+				// $roadways = $dbRoadway->getBySystemId($system->id);
+				$roadways = $system->roadways;
 				$combinatedColumnsContent = "";
-				foreach ($platna as $key => $platno) {
+				// echo $roadways[0];	
+				foreach ($roadways as $key => $roadway) {
 
 					$combinatedColumnsContent .= '<div class="row border-bottom">'. PHP_EOL;
-					$discriptionContainer = '<div class="col-sm-10">'.$platno["discription"].'</div>'. generatePlatnoRemoveButton($platno["id"]);
+					$discriptionContainer = '<div class="col-sm-10">'.$roadway->discription.'</div>'. generateRoadwayRemoveButton($roadway->id);
 					// $addPlatnoButton = generateAddPlatnoButton($system["id"]);
 					$combinatedColumnsContent .= generateCol($discriptionContainer,NULL);
 
 					// $combinatedColumnsContent .= generateAddPlatnoButton($system["id"]);
 
 
-					$lanes = $dbLanes->getByPlatnoId($platno["id"]);
+					// $lanes = $dbLanes->getByRoadwayId($roadway["id"]);
+					$lanes = $roadway->lanes;
 					$nastedColContent = "";
 					foreach ($lanes as $key => $lane) {
 
 						$nastedColContent .= '<div class="row border-bottom">'. PHP_EOL;
-						$directionText = '<div class="col-sm-10">'.directionToText($lane["direction"])    .'</div>';
+						$directionText = '<div class="col-sm-10">'.directionToText($lane->direction)    .'</div>';
 						// $directionText = "";
-						$nastedColContent .= generateCol($directionText . generateLaneRemoveButton($lane["id"]), NULL, false);
+						$nastedColContent .= generateCol($directionText . generateLaneRemoveButton($lane->id), NULL, false);
 
 						
 						$nastedColContent .= '</div>'. PHP_EOL;
 
 					}
-					$nastedColContent .= generateAddLaneButton($platno["id"]). PHP_EOL;
+					$nastedColContent .= generateAddLaneButton($roadway->id). PHP_EOL;
 					$combinatedColumnsContent .= generateCol($nastedColContent,NULL, false). PHP_EOL;
 
 					$combinatedColumnsContent .= '</div>'. PHP_EOL;
@@ -254,10 +315,10 @@ if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == 1)     {
 					// echo $combinatedColumnsContent;	
 
 				}
-				if(empty($platna)) {
-					echo generateCol(generateAddPlatnoButton($system["id"]), 4, false, false);
+				if(empty($roadways)) {
+					echo generateCol(generateAddRoadwayButton($system->id), 4, false, false);
 				} else {
-					$combinatedColumnsContent .= generateAddPlatnoButton($system["id"]);
+					$combinatedColumnsContent .= generateAddRoadwayButton($system->id);
 					echo generateCol($combinatedColumnsContent, 4, false, false);
 				}
 
@@ -266,7 +327,9 @@ if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == 1)     {
 				// echo "ppp";
 				// echo generateCol($combinatedColumnsContent, 4);
 				// echo "ppp";
-				echo generateCol("Визуализация", NULL);
+				$image = '<img src="images/8miDecember.png" class="img-fluid" alt="Responsive image">';
+				echo generateCol($image, NULL);
+				// echo generateCol("Визуализация", NULL);
 				echo "</div>". PHP_EOL;
 			}
 	    ?>

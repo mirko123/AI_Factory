@@ -16,17 +16,17 @@ if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == 1)     {
 	if($methodName == "GET") $_METHOD = $_GET;
 	else if($methodName == "POST") $_METHOD = $_POST;
 
-	if($_METHOD && array_key_exists('platnoId',$_METHOD))
+	if($_METHOD && array_key_exists('roadwayId',$_METHOD))
 	{
 
-		$platnoId = $_METHOD['platnoId'];
+		$roadwayId = $_METHOD['roadwayId'];
 		?>
 
 		<div class="container">
 			<h2>Добавяне на лента</h2>
 			<form class="form-horizontal" action="systems.php" method="GET">
 			    <div class="form-group">
-			      	<label class="control-label col-sm-2" for="platnoDiscription">Вид на лентата</label>
+			      	<label class="control-label col-sm-2" for="roadwayDiscription">Вид на лентата</label>
 			      	<div class="col-sm-8">
 			        <!-- <input name="direction" id="tb-idname" class="form-control" placeholder="Îïèñàíèå" type="text"> -->
 			        <select class="form-control form-select form-select-lg mb-3" name="direction" aria-label=".form-select-lg example">
@@ -39,7 +39,7 @@ if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == 1)     {
 						<option value="out">Изход</option>
 					</select>
 			        <?php 
-			        echo '<input name="platnoId" id="tb-idname" class="form-control" value="'.$platnoId.'" type="hidden">'.PHP_EOL;
+			        echo '<input name="roadwayId" id="tb-idname" class="form-control" value="'.$roadwayId.'" type="hidden">'.PHP_EOL;
 			         ?>
 			        <input name="queryType" id="tb-idname" class="form-control" value="newLane" type="hidden">
 			      	</div>

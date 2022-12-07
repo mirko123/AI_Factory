@@ -64,14 +64,6 @@
                 <input name="password" id="tb-password" class="form-control" type="password">
             </label>
             <br />
-            <label>
-                Влез като
-                <select name="type" class="form-control col-sm-9">
-                    <option value="student">студент</option>
-                    <option value="lecture">лектор</option>
-                </select>
-            </label>
-            <br />
             <input type="submit" id="btn-login" class="btn btn-success" value="Влез" />
         </form>
     </section>

@@ -23,8 +23,8 @@ class DBTrafficSystem
 
 	public function remove($id)
 	{
-		$dbPlatna = new DBPlatna();
-		$dbPlatna->removeBySystemId($id);
+		$dbRoadway = new DBRoadway();
+		$dbRoadway->removeBySystemId($id);
 
 		$query = "DELETE FROM `traffic_system` WHERE id=:id";
 		$statement = $this->db->connection->prepare($query);
@@ -49,7 +49,7 @@ class DBTrafficSystem
 
 
 
-class DBPlatna
+class DBRoadway
 {
 	protected $db;
 	function __construct()
@@ -60,7 +60,7 @@ class DBPlatna
 
 	public function add($systemId, $discription)
 	{	
-		$query = "INSERT INTO `platna` (systemId, discription) VALUES (:systemId, :discription)";
+		$query = "INSERT INTO `roadways` (systemId, discription) VALUES (:systemId, :discription)";
 		$statement = $this->db->connection->prepare($query);
 		$statement->bindParam(":systemId",$systemId);
 		$statement->bindParam(":discription",$discription);
@@ -71,9 +71,9 @@ class DBPlatna
 	public function remove($id)
 	{
 		$dbLanes = new DBLanes();
-		$dbLanes->removeByPlatnoId($id);
+		$dbLanes->removeByRoadwayId($id);
 
-		$query = "DELETE FROM `platna` WHERE id=:id";
+		$query = "DELETE FROM `roadways` WHERE id=:id";
 		$statement = $this->db->connection->prepare($query);
 		$statement->bindParam(":id",$id);
 		$res = $statement->execute();
@@ -82,22 +82,22 @@ class DBPlatna
 	public function removeBySystemId($systemId)
 	{
 
-		$platna = $this->getBySystem($systemId);
-		foreach ($platna as $key => $platno) {
-			$platnoId = $platno["id"];
+		$roadways = $this->getBySystemId($systemId);
+		foreach ($roadways as $key => $roadway) {
+			$roadwayId = $roadway["id"];
 			$dbLanes = new DBLanes();
-			$dbLanes->removeByPlatnoId($platnoId);
+			$dbLanes->removeByRoadwayId($roadwayId);
 		}
 
-		$query = "DELETE FROM `platna` WHERE systemId=:systemId";
+		$query = "DELETE FROM `roadways` WHERE systemId=:systemId";
 		$statement = $this->db->connection->prepare($query);
 		$statement->bindParam(":systemId",$systemId);
 		$res = $statement->execute();
 	}
 
-	public function getBySystem($systemId)
+	public function getBySystemId($systemId)
 	{	
-		$query = "SELECT platna.id, platna.systemId, platna.discription FROM platna WHERE platna.systemId = :systemId";
+		$query = "SELECT roadways.id, roadways.systemId, roadways.discription FROM roadways WHERE roadways.systemId = :systemId";
 		$statement = $this->db->connection->prepare($query);
 		$statement->bindParam(":systemId",$systemId);
 		$statement->execute();
@@ -108,7 +108,7 @@ class DBPlatna
 
 	public function getAll()
 	{	
-		$query = "SELECT platna.id, platna.systemId, platna.discription FROM platna";
+		$query = "SELECT roadways.id, roadways.systemId, roadways.discription FROM roadways";
 		$statement = $this->db->connection->prepare($query);
 		$statement->execute();
 		$count = $statement->rowCount();
@@ -127,11 +127,11 @@ class DBLanes
 		$this->db = DB::getInstance();;
 	}
 
-	public function add($platnoId, $direction)
+	public function add($roadwayId, $direction)
 	{	
-		$query = "INSERT INTO `lenti` (platnoId, direction) VALUES (:platnoId, :direction)";
+		$query = "INSERT INTO `lanes` (roadwayId, direction) VALUES (:roadwayId, :direction)";
 		$statement = $this->db->connection->prepare($query);
-		$statement->bindParam(":platnoId",$platnoId);
+		$statement->bindParam(":roadwayId",$roadwayId);
 		$statement->bindParam(":direction",$direction);
 		$res = $statement->execute();
 		return $res;
@@ -139,26 +139,26 @@ class DBLanes
 
 	public function remove($id)
 	{
-		$query = "DELETE FROM `lenti` WHERE id=:id";
+		$query = "DELETE FROM `lanes` WHERE id=:id";
 		$statement = $this->db->connection->prepare($query);
 		$statement->bindParam(":id",$id);
 		$res = $statement->execute();
 	}
 
-	public function removeByPlatnoId($platnoId)
+	public function removeByRoadwayId($roadwayId)
 	{
-		$query = "DELETE FROM `lenti` WHERE lenti.platnoId=:platnoId";
+		$query = "DELETE FROM `lanes` WHERE lanes.roadwayId=:roadwayId";
 		$statement = $this->db->connection->prepare($query);
-		$statement->bindParam(":platnoId",$platnoId);
+		$statement->bindParam(":roadwayId",$roadwayId);
 		$res = $statement->execute();
 	}
 
 
-	public function getByPlatnoId($platnoId)
+	public function getByRoadwayId($roadwayId)
 	{	
-		$query = "SELECT lenti.id, lenti.platnoId, lenti.direction FROM lenti WHERE lenti.platnoId = :platnoId";
+		$query = "SELECT lanes.id, lanes.roadwayId, lanes.direction FROM lanes WHERE lanes.roadwayId = :roadwayId";
 		$statement = $this->db->connection->prepare($query);
-		$statement->bindParam(":platnoId",$platnoId);
+		$statement->bindParam(":roadwayId",$roadwayId);
 		$statement->execute();
 		$count = $statement->rowCount();
 
@@ -168,7 +168,7 @@ class DBLanes
 
 	public function getAll()
 	{	
-		$query = "SELECT lenti.id, lenti.platnoId, lenti.direction FROM lenti";
+		$query = "SELECT lanes.id, lanes.roadwayId, lanes.direction FROM lanes";
 		$statement = $this->db->connection->prepare($query);
 		$statement->execute();
 		$count = $statement->rowCount();
